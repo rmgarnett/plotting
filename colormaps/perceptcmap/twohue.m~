@@ -1,0 +1,44 @@
+function [cmp,hsvOut] = lhsCmp(Hue,Hue2,n,xv,vv,xs,vs,vm);
+%function [cmp,hsvOut] = lhsCmp(Hue,n,low,satdrop,lumfull);
+% Hue is from 0-1.  Other arguements are optional. 
+%
+% n is the colormap length (current colormap is default)
+% low, satdrop, and lum full are all part of the color model.  
+%
+% - Hue is held constant.  
+% - Value liearly interpolated from [0 valfull 1]  onto [vv vm vm];
+% - Saturation is  liearly interpolated from [0 satdrop 1]  onto [1 1
+% satlow];
+%
+% In general it is good to make valful>=satdrop otherwise there is a
+% monochromatic region  between satdrop and valful.  
+%
+% in 1/12 increments hue is red, orange, yellow, yellow-green, green,
+% blue-green, cyan, slate-blue, blue, purple, magenta, pink/red.
+% Complements are 1/3 apart, opposites are of course 0.5 apart.
+%
+% Examples?  
+
+
+
+if nargin<5
+  vv=[];
+end;
+if nargin<4
+  xv=[];
+end;
+if nargin<7
+  vs=[];
+end;
+if nargin<6
+  xs=[];
+end;
+if nargin<8
+  vm=[];
+end;
+
+
+[cmp2,h1] = hueConstCmp(Hue2,floor(n/2),xv,vv,xs,vs,vm);
+[cmp1,h2] = hueConstCmp(Hue,floor(n/2),xv,vv,xs,vs,vm);
+cmp = [cmp1;flipud(cmp2)];
+hsvOut = [h1;flipud(h2)];

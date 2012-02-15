@@ -1,0 +1,434 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>TestColor</title>
+      <meta name="generator" content="MATLAB 7.7">
+      <meta name="date" content="2009-03-26">
+      <meta name="m-file" content="TestColor"><style type="text/css">
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1></h1>
+         <!--introduction-->
+         <!--/introduction-->
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Two-color colormap based on hueConstsCmp</a></li>
+               <li><a href="#2">Shaded colormap with much less value change...</a></li>
+               <li><a href="#3">Shaded colormap using redblue....</a></li>
+               <li><a href="#4">Shaded colormap using Rob Pinkel's map</a></li>
+            </ul>
+         </div>
+         <h2>Two-color colormap based on hueConstsCmp<a name="1"></a></h2>
+         <p>The colormap is defined by two hues, in this case near cyan and burnt orange.  These are complementary colors, so should have
+            equal attraction for our eyes.
+         </p>
+         <p>The data is velocity data in the ocean showing oscillating tidal flow with depth and in time.  The colormap is centered about
+            0 in all cases.  A median velocity has been removed to remove the effect of a mean current in this area (otherwise the plots
+            are very blue).  The scar in the middle is bad data.
+         </p><pre class="codeinput">load <span class="string">sampleU</span>;
+
+
+figure(1);orient <span class="string">landscape</span>;clf; wysiwyg
+
+[cmp,hueout] = twohue(7/12,1/12,64,0.5,0,0.6,0.6,1);
+
+subplot(2,3,1);
+imagesc(U-median(U(:)));
+caxis([-1 1]/5);
+colormap(cmp);
+freezeColors;
+title({<span class="string">'Value goes to 1 in middle'</span>});
+ylabel(<span class="string">'DEPTH'</span>);
+
+[cmp,hueout] = twohue(7/12,1/12,64,0.5,0,0.6,0.2,0.925);
+
+subplot(2,3,2);
+imagesc(U-median(U(:)));
+caxis([-1 1]/5);
+colormap(cmp);
+freezeColors;
+title(<span class="string">'Value goes to 0.925 in middle'</span>);
+
+
+[cmp,hueout] = twohue(7/12,1/12,64,0.5,0,0.6,0.6,0.8);
+
+
+
+subplot(2,3,3);
+imagesc(U-median(U(:)));
+caxis([-1 1]/5);
+colormap(cmp);
+freezeColors;
+title(<span class="string">'Value goes to 0.8 in middle'</span>);
+
+cmp = jet(64);
+subplot(2,3,5);
+imagesc(U-median(U(:)));
+caxis([-1 1]/5);
+colormap(cmp);
+freezeColors;
+title(<span class="string">'Jet'</span>);
+
+cmp = redblue(64);
+subplot(2,3,6);
+imagesc(U-median(U(:)));
+caxis([-1 1]/5);
+colormap(cmp);
+freezeColors;
+title(<span class="string">'Jet White'</span>);
+xlabel(<span class="string">'TIME'</span>);
+
+cmp = coolhot(64);
+subplot(2,3,4);
+imagesc(U-median(U(:)));
+caxis([-1 1]/5);
+colormap(cmp);
+freezeColors;
+title(<span class="string">'Red-Blue'</span>);
+set(datachildren(gcf),<span class="string">'xtick'</span>,[0:500:2000])
+</pre><img vspace="5" hspace="5" src="TestColor_01.png" alt=""> <h2>Shaded colormap with much less value change...<a name="2"></a></h2>
+         <p>I also like to use shaded colormaps, where the first difference in the vertical adds some shading to the plot.  In this case,
+            fewer hues is quite advantageous.
+         </p><pre class="codeinput">[cmp,hueout] = twohue(7/12,1/12,128,0.3,0.2,0.3,0.7,1);
+
+hh = rgb2hsv(cmp);
+hh(64,1)=hh(63,1);
+hh(65,1)=hh(66,1);
+hh(:,1) = conv2(hh(:,1),ones(20,1)/20,<span class="string">'same'</span>);
+cmp = hsv2rgb(hh);
+
+dU = conv2(diffsame(U),ones(3,10)/30,<span class="string">'same'</span>);;
+x= 1:size(dU,1);
+z=1:size(dU,2);
+
+jmkfigure(23,2,0.6);clf
+subplot(4,1,[1 3]);
+shadedpcolor(x,z,(U-median(U(:))),dU,[-1 1]/5,[-1 1]/200,0.7,cmp,0);
+axis <span class="string">square</span>
+shadedcolorbar(<span class="string">'v'</span>,[-1 1]/5,0.7,cmp);
+subplot(4,1,[4]);
+plot(hueout);
+set(gca,<span class="string">'ylim'</span>,[0 1.2])
+
+suptitle(<span class="string">'Value goes to 1 in middle for very bright middle'</span>);
+</pre><img vspace="5" hspace="5" src="TestColor_02.png" alt=""> <h2>Shaded colormap using redblue....<a name="3"></a></h2>
+         <p>Just a little value change at the very ends...</p><pre class="codeinput">cmp = redblue(64);
+
+dU = conv2(diffsame(U),ones(3,10)/30,<span class="string">'same'</span>);;
+x= 1:size(dU,1);
+z=1:size(dU,2);
+
+jmkfigure(24,2,0.6);clf
+subplot(4,1,[1 3]);
+shadedpcolor(x,z,(U-median(U(:))),dU,[-1 1]/5,[-1 1]/200,0.7,cmp,0);
+axis <span class="string">square</span>
+colorbar
+subplot(4,1,[4]);
+plot(hueout);
+set(gca,<span class="string">'ylim'</span>,[0 1.2])
+
+suptitle(<span class="string">'Value goes to 1 in middle for very bright middle'</span>);
+
+<span class="comment">% Just a little value change at the very ends...</span>
+[cmp,hueout] = twohue(7/12,1/12,64,0.3,0.0,0.3,0.7,1);
+
+dU = conv2(diffsame(U),ones(3,10)/30,<span class="string">'same'</span>);;
+x= 1:size(dU,1);
+z=1:size(dU,2);
+
+jmkfigure(23,2,0.6);clf
+subplot(4,1,[1 3]);
+shadedpcolor(x,z,(U-median(U(:))),dU,[-1 1]/5,[-1 1]/200,0.7,cmp,0);
+axis <span class="string">square</span>
+shadedcolorbar(<span class="string">'v'</span>,[-1 1]/5,0.7,cmp);
+subplot(4,1,[4]);
+plot(hueout);
+set(gca,<span class="string">'ylim'</span>,[0 1.2])
+
+suptitle(<span class="string">'Value goes to 1 in middle for very bright middle'</span>);
+</pre><img vspace="5" hspace="5" src="TestColor_03.png" alt=""> <img vspace="5" hspace="5" src="TestColor_04.png" alt=""> <h2>Shaded colormap using Rob Pinkel's map<a name="4"></a></h2>
+         <p>Rob Pinkel and his students are the first folks who used this shaded visualization in the literature that I am aware of. 
+            Rob uses this colormap...
+         </p><pre class="codeinput">cmp = jet(92);
+cmp = cmp(40:70,:);
+
+dU = conv2(diffsame(U),ones(3,10)/30,<span class="string">'same'</span>);;
+x= 1:size(dU,1);
+z=1:size(dU,2);
+
+jmkfigure(25,2,0.6);clf
+subplot(1,2,1);
+shadedpcolor(x,z,(U-median(U(:))),dU,[-1 1]/5,[-1 1]/200,0.7,cmp,0);
+<span class="comment">%freezeColors;</span>
+hh=shadedcolorbar(<span class="string">'v'</span>,[-1 1]/5,0.7,cmp);
+<span class="comment">%hh=smallbar(gca,hh,0.6,0.4);</span>
+<span class="comment">%freezeColors(hh);</span>
+smallbar(gca,hh,0.6,0.4);
+
+
+[cmp,hueout] = twohue(7/12,1/12,64,0.3,0.0,0.3,0.7,1);
+
+dU = conv2(diffsame(U),ones(3,10)/30,<span class="string">'same'</span>);;
+x= 1:size(dU,1);
+z=1:size(dU,2);
+
+subplot(1,2,2);
+shadedpcolor(x,z,(U-median(U(:))),dU,[-1 1]/5,[-1 1]/200,0.7,cmp,0);
+hh=shadedcolorbar(<span class="string">'v'</span>,[-1 1]/5,0.7,cmp);
+smallbar(gca,hh,0.6,0.4);
+</pre><img vspace="5" hspace="5" src="TestColor_05.png" alt=""> <p class="footer"><br>
+            Published with MATLAB&reg; 7.7<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+
+%% Two-color colormap based on hueConstsCmp
+% 
+% The colormap is defined by two hues, in this case near cyan and
+% burnt orange.  These are complementary colors, so should have
+% equal attraction for our eyes. 
+%
+% The data is velocity data in the ocean showing oscillating
+% tidal flow with depth and in time.  The colormap is centered
+% about 0 in all cases.  A median velocity has been removed to
+% remove the effect of a mean current in this area (otherwise the
+% plots are very blue).  The scar in the middle is bad data.
+
+load sampleU;
+
+
+figure(1);orient landscape;clf; wysiwyg
+
+[cmp,hueout] = twohue(7/12,1/12,64,0.5,0,0.6,0.6,1);
+
+subplot(2,3,1);
+imagesc(U-median(U(:)));
+caxis([-1 1]/5);
+colormap(cmp);
+freezeColors;
+title({'Value goes to 1 in middle'});
+ylabel('DEPTH');
+
+[cmp,hueout] = twohue(7/12,1/12,64,0.5,0,0.6,0.2,0.925);
+
+subplot(2,3,2);
+imagesc(U-median(U(:)));
+caxis([-1 1]/5);
+colormap(cmp);
+freezeColors;
+title('Value goes to 0.925 in middle');
+
+
+[cmp,hueout] = twohue(7/12,1/12,64,0.5,0,0.6,0.6,0.8);
+
+
+
+subplot(2,3,3);
+imagesc(U-median(U(:)));
+caxis([-1 1]/5);
+colormap(cmp);
+freezeColors;
+title('Value goes to 0.8 in middle');
+
+cmp = jet(64);
+subplot(2,3,5);
+imagesc(U-median(U(:)));
+caxis([-1 1]/5);
+colormap(cmp);
+freezeColors;
+title('Jet');
+
+cmp = redblue(64);
+subplot(2,3,6);
+imagesc(U-median(U(:)));
+caxis([-1 1]/5);
+colormap(cmp);
+freezeColors;
+title('Jet White');
+xlabel('TIME');
+
+cmp = coolhot(64);
+subplot(2,3,4);
+imagesc(U-median(U(:)));
+caxis([-1 1]/5);
+colormap(cmp);
+freezeColors;
+title('Red-Blue');
+set(datachildren(gcf),'xtick',[0:500:2000])
+
+
+
+%% Shaded colormap with much less value change...
+%
+% I also like to use shaded colormaps, where the first difference
+% in the vertical adds some shading to the plot.  In this case,
+% fewer hues is quite advantageous.
+
+[cmp,hueout] = twohue(7/12,1/12,128,0.3,0.2,0.3,0.7,1);
+
+hh = rgb2hsv(cmp);
+hh(64,1)=hh(63,1);
+hh(65,1)=hh(66,1);
+hh(:,1) = conv2(hh(:,1),ones(20,1)/20,'same');
+cmp = hsv2rgb(hh);
+
+dU = conv2(diffsame(U),ones(3,10)/30,'same');;
+x= 1:size(dU,1);
+z=1:size(dU,2);
+
+jmkfigure(23,2,0.6);clf
+subplot(4,1,[1 3]);
+shadedpcolor(x,z,(U-median(U(:))),dU,[-1 1]/5,[-1 1]/200,0.7,cmp,0);
+axis square
+shadedcolorbar('v',[-1 1]/5,0.7,cmp);
+subplot(4,1,[4]);
+plot(hueout);
+set(gca,'ylim',[0 1.2])
+
+suptitle('Value goes to 1 in middle for very bright middle');
+
+%% Shaded colormap using redblue....
+% Just a little value change at the very ends...
+cmp = redblue(64);
+
+dU = conv2(diffsame(U),ones(3,10)/30,'same');;
+x= 1:size(dU,1);
+z=1:size(dU,2);
+
+jmkfigure(24,2,0.6);clf
+subplot(4,1,[1 3]);
+shadedpcolor(x,z,(U-median(U(:))),dU,[-1 1]/5,[-1 1]/200,0.7,cmp,0);
+axis square
+colorbar
+subplot(4,1,[4]);
+plot(hueout);
+set(gca,'ylim',[0 1.2])
+
+suptitle('Value goes to 1 in middle for very bright middle');
+
+% Just a little value change at the very ends...
+[cmp,hueout] = twohue(7/12,1/12,64,0.3,0.0,0.3,0.7,1);
+
+dU = conv2(diffsame(U),ones(3,10)/30,'same');;
+x= 1:size(dU,1);
+z=1:size(dU,2);
+
+jmkfigure(23,2,0.6);clf
+subplot(4,1,[1 3]);
+shadedpcolor(x,z,(U-median(U(:))),dU,[-1 1]/5,[-1 1]/200,0.7,cmp,0);
+axis square
+shadedcolorbar('v',[-1 1]/5,0.7,cmp);
+subplot(4,1,[4]);
+plot(hueout);
+set(gca,'ylim',[0 1.2])
+
+suptitle('Value goes to 1 in middle for very bright middle');
+
+%% Shaded colormap using Rob Pinkel's map
+%
+% Rob Pinkel and his students are the first folks who used this
+% shaded visualization in the literature that I am aware of.  Rob
+% uses this colormap...
+
+cmp = jet(92);
+cmp = cmp(40:70,:);
+
+dU = conv2(diffsame(U),ones(3,10)/30,'same');;
+x= 1:size(dU,1);
+z=1:size(dU,2);
+
+jmkfigure(25,2,0.6);clf
+subplot(1,2,1);
+shadedpcolor(x,z,(U-median(U(:))),dU,[-1 1]/5,[-1 1]/200,0.7,cmp,0);
+%freezeColors;
+hh=shadedcolorbar('v',[-1 1]/5,0.7,cmp);
+%hh=smallbar(gca,hh,0.6,0.4);
+%freezeColors(hh);
+smallbar(gca,hh,0.6,0.4);
+
+
+[cmp,hueout] = twohue(7/12,1/12,64,0.3,0.0,0.3,0.7,1);
+
+dU = conv2(diffsame(U),ones(3,10)/30,'same');;
+x= 1:size(dU,1);
+z=1:size(dU,2);
+
+subplot(1,2,2);
+shadedpcolor(x,z,(U-median(U(:))),dU,[-1 1]/5,[-1 1]/200,0.7,cmp,0);
+hh=shadedcolorbar('v',[-1 1]/5,0.7,cmp);
+smallbar(gca,hh,0.6,0.4);
+
+
+
+
+
+
+##### SOURCE END #####
+-->
+   </body>
+</html>
